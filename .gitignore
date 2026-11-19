@@ -1,0 +1,56 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+.coverage
+htmlcov/
+
+# ---- Secrets & local config ----
+.env
+.env.local
+
+# ---- Node / frontend ----
+node_modules/
+roadwatch/frontend/dist/
+*.tsbuildinfo
+
+# ---- Runtime data: uploads, artifacts, databases, logs ----
+roadwatch/data/uploads/*
+roadwatch/data/processed/*
+roadwatch/data/database/*
+roadwatch/data/logs/*
+!roadwatch/data/uploads/.gitkeep
+!roadwatch/data/processed/.gitkeep
+!roadwatch/data/database/.gitkeep
+!roadwatch/data/logs/.gitkeep
+
+# ---- Model weights — never commit ----
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# ---- Training / prediction output (derived) ----
+runs/
+track_*/
+yolo_*/
+
+# ---- Demo/source footage stays local (project privacy stance) ----
+*.mp4
+*.mov
+*.avi
+
+# ---- Derived files ----
+_brief_extracted.txt
+
+# ---- Notebooks ----
+.ipynb_checkpoints/
+
+# ---- Editor / OS ----
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

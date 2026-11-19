@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Node
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# Env & editor
+.env
+.vscode/
+.idea/
+
+# Runtime data (uploads, artifacts, database, logs)
+data/uploads/*
+data/processed/*
+data/database/*
+data/logs/*
+!data/uploads/.gitkeep
+!data/processed/.gitkeep
+!data/database/.gitkeep
+!data/logs/.gitkeep
+
+# Model weights — never commit
+models/*.pt
+backend/app/ml/weights/*.pt
+
+# OS
+Thumbs.db
+.DS_Store

@@ -1,0 +1,139 @@
+{
+  "id": "return-pass",
+  "name": "Return Pass (synthetic)",
+  "description": "Westbound return along the potholed road at 8 m/s, approaching the same hazards from behind.",
+  "is_synthetic": true,
+  "distance_m": 200.5,
+  "points": [
+    {
+      "lat": -4.273712,
+      "lon": 21.543775,
+      "timestamp_seconds": 0
+    },
+    {
+      "lat": -4.273762,
+      "lon": 21.543725,
+      "timestamp_seconds": 1
+    },
+    {
+      "lat": -4.273817,
+      "lon": 21.543677,
+      "timestamp_seconds": 2
+    },
+    {
+      "lat": -4.273871,
+      "lon": 21.543627,
+      "timestamp_seconds": 3
+    },
+    {
+      "lat": -4.273921,
+      "lon": 21.543579,
+      "timestamp_seconds": 4
+    },
+    {
+      "lat": -4.273976,
+      "lon": 21.543526,
+      "timestamp_seconds": 5
+    },
+    {
+      "lat": -4.274029,
+      "lon": 21.54348,
+      "timestamp_seconds": 6
+    },
+    {
+      "lat": -4.274077,
+      "lon": 21.543426,
+      "timestamp_seconds": 7
+    },
+    {
+      "lat": -4.274128,
+      "lon": 21.543382,
+      "timestamp_seconds": 8
+    },
+    {
+      "lat": -4.274182,
+      "lon": 21.54333,
+      "timestamp_seconds": 9
+    },
+    {
+      "lat": -4.274238,
+      "lon": 21.543277,
+      "timestamp_seconds": 10
+    },
+    {
+      "lat": -4.274288,
+      "lon": 21.543228,
+      "timestamp_seconds": 11
+    },
+    {
+      "lat": -4.274342,
+      "lon": 21.543179,
+      "timestamp_seconds": 12
+    },
+    {
+      "lat": -4.274395,
+      "lon": 21.543131,
+      "timestamp_seconds": 13
+    },
+    {
+      "lat": -4.274445,
+      "lon": 21.543084,
+      "timestamp_seconds": 14
+    },
+    {
+      "lat": -4.274497,
+      "lon": 21.543033,
+      "timestamp_seconds": 15
+    },
+    {
+      "lat": -4.27455,
+      "lon": 21.542984,
+      "timestamp_seconds": 16
+    },
+    {
+      "lat": -4.274602,
+      "lon": 21.542932,
+      "timestamp_seconds": 17
+    },
+    {
+      "lat": -4.274651,
+      "lon": 21.542887,
+      "timestamp_seconds": 18
+    },
+    {
+      "lat": -4.274704,
+      "lon": 21.542836,
+      "timestamp_seconds": 19
+    },
+    {
+      "lat": -4.27476,
+      "lon": 21.542783,
+      "timestamp_seconds": 20
+    },
+    {
+      "lat": -4.274813,
+      "lon": 21.542733,
+      "timestamp_seconds": 21
+    },
+    {
+      "lat": -4.274862,
+      "lon": 21.542686,
+      "timestamp_seconds": 22
+    },
+    {
+      "lat": -4.274914,
+      "lon": 21.542636,
+      "timestamp_seconds": 23
+    },
+    {
+      "lat": -4.274965,
+      "lon": 21.542589,
+      "timestamp_seconds": 24
+    },
+    {
+      "lat": -4.275024,
+      "lon": 21.542536,
+      "timestamp_seconds": 25
+    }
+  ]
+}

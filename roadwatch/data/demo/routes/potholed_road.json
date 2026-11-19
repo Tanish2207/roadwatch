@@ -1,0 +1,139 @@
+{
+  "id": "potholed-road",
+  "name": "Potholed Road (synthetic)",
+  "description": "Synthetic 26 s track near the demo anchor, 8 m/s.",
+  "is_synthetic": true,
+  "distance_m": 200.0,
+  "points": [
+    {
+      "lat": -4.275002,
+      "lon": 21.542498,
+      "timestamp_seconds": 0
+    },
+    {
+      "lat": -4.274951,
+      "lon": 21.542535,
+      "timestamp_seconds": 1
+    },
+    {
+      "lat": -4.274901,
+      "lon": 21.542603,
+      "timestamp_seconds": 2
+    },
+    {
+      "lat": -4.27484,
+      "lon": 21.542654,
+      "timestamp_seconds": 3
+    },
+    {
+      "lat": -4.274794,
+      "lon": 21.542718,
+      "timestamp_seconds": 4
+    },
+    {
+      "lat": -4.27474,
+      "lon": 21.542739,
+      "timestamp_seconds": 5
+    },
+    {
+      "lat": -4.274686,
+      "lon": 21.542803,
+      "timestamp_seconds": 6
+    },
+    {
+      "lat": -4.274636,
+      "lon": 21.542845,
+      "timestamp_seconds": 7
+    },
+    {
+      "lat": -4.274622,
+      "lon": 21.542901,
+      "timestamp_seconds": 8
+    },
+    {
+      "lat": -4.274535,
+      "lon": 21.542945,
+      "timestamp_seconds": 9
+    },
+    {
+      "lat": -4.274493,
+      "lon": 21.543006,
+      "timestamp_seconds": 10
+    },
+    {
+      "lat": -4.274434,
+      "lon": 21.543064,
+      "timestamp_seconds": 11
+    },
+    {
+      "lat": -4.274397,
+      "lon": 21.543104,
+      "timestamp_seconds": 12
+    },
+    {
+      "lat": -4.274342,
+      "lon": 21.543188,
+      "timestamp_seconds": 13
+    },
+    {
+      "lat": -4.27428,
+      "lon": 21.543229,
+      "timestamp_seconds": 14
+    },
+    {
+      "lat": -4.274222,
+      "lon": 21.543263,
+      "timestamp_seconds": 15
+    },
+    {
+      "lat": -4.274177,
+      "lon": 21.5433,
+      "timestamp_seconds": 16
+    },
+    {
+      "lat": -4.27414,
+      "lon": 21.543374,
+      "timestamp_seconds": 17
+    },
+    {
+      "lat": -4.274079,
+      "lon": 21.543411,
+      "timestamp_seconds": 18
+    },
+    {
+      "lat": -4.274024,
+      "lon": 21.543462,
+      "timestamp_seconds": 19
+    },
+    {
+      "lat": -4.273991,
+      "lon": 21.543516,
+      "timestamp_seconds": 20
+    },
+    {
+      "lat": -4.273939,
+      "lon": 21.543575,
+      "timestamp_seconds": 21
+    },
+    {
+      "lat": -4.273879,
+      "lon": 21.543623,
+      "timestamp_seconds": 22
+    },
+    {
+      "lat": -4.273828,
+      "lon": 21.543661,
+      "timestamp_seconds": 23
+    },
+    {
+      "lat": -4.273767,
+      "lon": 21.543723,
+      "timestamp_seconds": 24
+    },
+    {
+      "lat": -4.273712,
+      "lon": 21.543775,
+      "timestamp_seconds": 25
+    }
+  ]
+}

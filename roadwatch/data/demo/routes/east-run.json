@@ -1,0 +1,139 @@
+{
+  "id": "east-run",
+  "name": "East Run (synthetic)",
+  "description": "Eastbound from the demo anchor at 8 m/s \u2014 hazards sit off to the side.",
+  "is_synthetic": true,
+  "distance_m": 200.0,
+  "points": [
+    {
+      "lat": -4.275003,
+      "lon": 21.542496,
+      "timestamp_seconds": 0
+    },
+    {
+      "lat": -4.275001,
+      "lon": 21.542567,
+      "timestamp_seconds": 1
+    },
+    {
+      "lat": -4.275002,
+      "lon": 21.542641,
+      "timestamp_seconds": 2
+    },
+    {
+      "lat": -4.275005,
+      "lon": 21.542714,
+      "timestamp_seconds": 3
+    },
+    {
+      "lat": -4.275005,
+      "lon": 21.542786,
+      "timestamp_seconds": 4
+    },
+    {
+      "lat": -4.275005,
+      "lon": 21.542856,
+      "timestamp_seconds": 5
+    },
+    {
+      "lat": -4.275002,
+      "lon": 21.542933,
+      "timestamp_seconds": 6
+    },
+    {
+      "lat": -4.275004,
+      "lon": 21.543001,
+      "timestamp_seconds": 7
+    },
+    {
+      "lat": -4.275001,
+      "lon": 21.543078,
+      "timestamp_seconds": 8
+    },
+    {
+      "lat": -4.275002,
+      "lon": 21.543147,
+      "timestamp_seconds": 9
+    },
+    {
+      "lat": -4.274999,
+      "lon": 21.543217,
+      "timestamp_seconds": 10
+    },
+    {
+      "lat": -4.275,
+      "lon": 21.54329,
+      "timestamp_seconds": 11
+    },
+    {
+      "lat": -4.275004,
+      "lon": 21.543361,
+      "timestamp_seconds": 12
+    },
+    {
+      "lat": -4.275003,
+      "lon": 21.543438,
+      "timestamp_seconds": 13
+    },
+    {
+      "lat": -4.275004,
+      "lon": 21.543509,
+      "timestamp_seconds": 14
+    },
+    {
+      "lat": -4.275001,
+      "lon": 21.543579,
+      "timestamp_seconds": 15
+    },
+    {
+      "lat": -4.275002,
+      "lon": 21.54365,
+      "timestamp_seconds": 16
+    },
+    {
+      "lat": -4.275005,
+      "lon": 21.543723,
+      "timestamp_seconds": 17
+    },
+    {
+      "lat": -4.275001,
+      "lon": 21.543796,
+      "timestamp_seconds": 18
+    },
+    {
+      "lat": -4.275003,
+      "lon": 21.543869,
+      "timestamp_seconds": 19
+    },
+    {
+      "lat": -4.275002,
+      "lon": 21.54394,
+      "timestamp_seconds": 20
+    },
+    {
+      "lat": -4.275,
+      "lon": 21.544014,
+      "timestamp_seconds": 21
+    },
+    {
+      "lat": -4.275004,
+      "lon": 21.544086,
+      "timestamp_seconds": 22
+    },
+    {
+      "lat": -4.275002,
+      "lon": 21.54416,
+      "timestamp_seconds": 23
+    },
+    {
+      "lat": -4.275001,
+      "lon": 21.544228,
+      "timestamp_seconds": 24
+    },
+    {
+      "lat": -4.274999,
+      "lon": 21.544299,
+      "timestamp_seconds": 25
+    }
+  ]
+}
