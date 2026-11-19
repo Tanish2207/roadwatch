@@ -112,8 +112,9 @@ export function Settings() {
           </p>
           <p className="font-mono text-xs leading-relaxed text-ink/70">
             Video, frames, GPS and inference never leave this machine. No cloud AI services are
-            used. External dependencies: OpenStreetMap map tiles — loading a map reveals your map
-            viewport to the tile provider ({s?.privacy.tile_provider ?? "…"}).
+            used. External dependencies: map tiles — satellite (Esri) by default, switchable to
+            OpenStreetMap street view on the map. Loading a map reveals your viewport to the
+            selected tile provider ({s?.privacy.tile_provider ?? "…"}).
           </p>
           <p className="font-mono text-xs leading-relaxed text-ink/70">
             RoadWatch alerts are experimental and must not be the sole basis for driving decisions.

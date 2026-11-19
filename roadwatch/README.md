@@ -6,7 +6,8 @@ model, associates detections with GPS, consolidates repeats into deduplicated
 hazard records, and displays them on a browsable map with route simulation and
 alerts.
 
-> **Prototype status.** All data is local. Map tiles come from OpenStreetMap
+> **Prototype status.** All data is local. Map tiles come from Esri World
+> Imagery satellite by default, switchable to OpenStreetMap street view
 > (loading a map reveals your viewport to the tile provider). Alerts are
 > experimental and must not be the sole basis for driving decisions.
 
@@ -74,16 +75,41 @@ Open **http://localhost:5173**. API docs at **http://127.0.0.1:8000/docs**.
 
 ```powershell
 cd roadwatch\backend
-python -m pytest        # 38 tests: units, smoke, hazard filters, simulation alerts
+python -m pytest        # 53 tests: units, smoke, hazard filters, simulation alerts
 cd ..\frontend
-npm test                # vitest: geo utils, map filters/drawer, playback + alert feed
+npm test                # vitest: geo/marker-size utils, map filters/drawer, playback + alert feed
 npm run build           # type-check + production build
 ```
 
+## Reset the database
+
+Empty every job, hazard, observation and status-history row. The schema is
+kept, so the API starts up empty and works normally — data returns only when
+you process a video again. Nothing re-seeds on startup.
+
+```powershell
+cd roadwatch
+python scripts/clear_database.py              # timestamped backup, then clear
+python scripts/clear_database.py --no-backup  # skip the backup
+```
+
+A backup is written to `data/database/backups/` first; stop the backend if it
+is running (it can hold the database file).
+
 ## Hazard map (M6)
 
-- Leaflet + OpenStreetMap tiles (no API key), neo-brutalist marker/cluster
-  styling, marker clustering on the map page.
+- Leaflet with switchable base layers — Esri World Imagery satellite (the
+  default), the same satellite view with place/road labels, or OpenStreetMap
+  street view; no API key — plus neo-brutalist marker/cluster styling and
+  marker clustering on the map page.
+- Markers keep one simple badge shape in **three size tiers** — small (16 px),
+  medium (22 px), severe (30 px) — chosen from the YOLO bounding box: the
+  backend stores each hazard's mean bbox area as a fraction of the source
+  frame (`bbox_area_frac`, so hazards from different video resolutions stay
+  comparable) and the frontend maps it to a tier (`src/utils/hazardSize.ts`:
+  <3 % small, 3–12 % medium, ≥12 % severe, unknown ⇒ medium). Run
+  `python scripts/backfill_pixel_area.py` (from `roadwatch/`) once to size
+  hazards that were aggregated before area tracking existed.
 - Filters: status, min confidence, min reports, time range — all evaluated by
   the backend `GET /api/hazards` query.
 - Clicking a marker opens the detail drawer: observation summaries (capped at
@@ -146,4 +172,5 @@ timestamp,latitude,longitude,speed_mps,heading_deg
 ## Privacy
 
 Video, frames, GPS and inference stay on this machine. No third-party AI
-services. Only external traffic: OpenStreetMap map tiles when a map is open.
+services. Only external traffic: map tiles (Esri satellite or OpenStreetMap
+street view) when a map is open.

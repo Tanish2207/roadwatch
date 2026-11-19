@@ -60,6 +60,15 @@ export const fixtures = {
       last_seen_at: "2026-11-19T10:30:00Z",
       location_uncertainty_m: 9.4,
       is_stale: false,
+      pixel_area_summary: {
+        count: 3,
+        mean_area_px: 18400,
+        max_area_px: 24600,
+        frac_count: 3,
+        mean_area_frac: 0.012,
+        max_area_frac: 0.016,
+      },
+      bbox_area_frac: 0.012,
       ...extra,
     };
   },
@@ -69,7 +78,6 @@ export const fixtures = {
       ...fixtures.hazard(id, lat, lon),
       resolved_at: null,
       resolved_note: null,
-      pixel_area_summary: null,
       physical_area_m2: null,
       observations: [
         {

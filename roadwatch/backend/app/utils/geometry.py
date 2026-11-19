@@ -16,6 +16,16 @@ def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * EARTH_RADIUS_M * math.asin(math.sqrt(a))
 
 
+def bbox_area(bbox_xyxy: list | tuple | None) -> float | None:
+    """Pixel area of an [x1, y1, x2, y2] box; None when malformed or empty."""
+    try:
+        x1, y1, x2, y2 = (float(v) for v in (bbox_xyxy or []))
+    except (TypeError, ValueError):
+        return None
+    area = (x2 - x1) * (y2 - y1)
+    return area if area > 0 else None
+
+
 def bearing_deg(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Initial bearing from point 1 to point 2, in degrees [0, 360)."""
     phi1, phi2 = math.radians(lat1), math.radians(lat2)

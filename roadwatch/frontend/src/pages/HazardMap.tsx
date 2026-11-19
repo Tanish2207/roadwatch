@@ -4,6 +4,7 @@ import { api, ApiError } from "../api/client";
 import { EmptyState } from "../components/EmptyState";
 import { MapView, type MapMarkerSpec } from "../components/MapView";
 import { usePoll } from "../hooks/usePoll";
+import { hazardSizeFor } from "../utils/hazardSize";
 import type {
   HazardDetail,
   HazardStatus,
@@ -130,16 +131,21 @@ export function HazardMap() {
   // --- Map markers -----------------------------------------------------------
   const markers = useMemo<MapMarkerSpec[]>(
     () =>
-      items.map((h) => ({
-        id: h.id,
-        lat: h.latitude,
-        lon: h.longitude,
-        kind: `hazard-${h.status}`,
-        selected: h.id === selectedId,
-        label: `${h.status} · ×${h.report_count} reports${
-          h.confidence_avg != null ? ` · conf ${h.confidence_avg.toFixed(2)}` : ""
-        }`,
-      })),
+      items.map((h) => {
+        // Marker box size comes from the YOLO bbox area (small/medium/severe).
+        const size = hazardSizeFor(h.bbox_area_frac);
+        return {
+          id: h.id,
+          lat: h.latitude,
+          lon: h.longitude,
+          kind: `hazard-${h.status}`,
+          size,
+          selected: h.id === selectedId,
+          label: `${h.status} · ×${h.report_count} reports${
+            h.confidence_avg != null ? ` · conf ${h.confidence_avg.toFixed(2)}` : ""
+          } · ${size} pothole`,
+        };
+      }),
     [items, selectedId],
   );
 
@@ -459,8 +465,8 @@ export function HazardMap() {
             {/* Tile-provider disclosure (brief §13) */}
             <p className="flex items-center gap-2 border-t-[3px] border-ink bg-surface px-4 py-2 font-mono text-[10px] uppercase text-ink/70">
               <MapPin size={12} />
-              Map tiles © OpenStreetMap contributors — tile requests reveal this viewport to the
-              tile provider. All hazard data stays local.
+              Map tiles © Esri or OpenStreetMap (switch in the map corner) — tile requests reveal
+              this viewport to the selected tile provider. All hazard data stays local.
             </p>
           </div>
         </div>

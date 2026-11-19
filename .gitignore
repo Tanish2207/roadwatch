@@ -39,7 +39,6 @@ track_*/
 yolo_*/
 
 # ---- Demo/source footage stays local (project privacy stance) ----
-*.mp4
 *.mov
 *.avi
 

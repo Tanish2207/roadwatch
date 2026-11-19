@@ -296,6 +296,112 @@ def test_reaggregate_stable_link_when_centroid_drifts() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Bbox area aggregation (marker sizing on the map)
+# ---------------------------------------------------------------------------
+def test_bbox_area_helper() -> None:
+    from app.utils.geometry import bbox_area
+
+    assert bbox_area([0, 0, 10, 20]) == pytest.approx(200.0)
+    assert bbox_area([5, 5, 12, 9]) == pytest.approx(28.0)
+    assert bbox_area([10, 10, 10, 30]) is None  # zero-width box
+    assert bbox_area([10, 10, 4, 30]) is None   # inverted box
+    assert bbox_area("not-a-box") is None
+    assert bbox_area(None) is None
+
+
+def test_area_summary_from_bbox_and_frame_fraction() -> None:
+    """Aggregating bboxes yields pixel stats plus a frame-normalized fraction."""
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+
+    from app.db.database import Base
+    from app.db.models import DetectionObservation, Hazard, ProcessingJob
+    from app.schemas.hazards import HazardSummary
+    from app.services.aggregation_service import aggregate_observations
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+
+    with Session(engine) as db:
+        job = ProcessingJob(
+            original_filename="clip.mp4",
+            video_path="/tmp/clip.mp4",
+            processing_config={"frame_width": 100, "frame_height": 100},
+        )
+        db.add(job)
+        db.flush()
+
+        def obs(bbox: list[float], lat: float) -> DetectionObservation:
+            return DetectionObservation(
+                job_id=job.id,
+                frame_timestamp_seconds=1.0,
+                class_name="pothole",
+                confidence=0.6,
+                bbox_xyxy=bbox,
+                gps_lat=lat,
+                gps_lon=21.5425,
+                gps_match_method="nearest",
+                gps_match_delta_seconds=0.0,
+            )
+
+        # 20x10 = 200 px (2% of the 100x100 frame) and 50x40 = 2000 px (20%)
+        first = obs([0, 0, 20, 10], -4.2750)
+        second = obs([0, 0, 50, 40], -4.27501)
+        aggregate_observations(db, [first, second])
+
+        hazard = db.query(Hazard).one()
+        summary = hazard.pixel_area_summary or {}
+        assert summary["count"] == 2
+        assert summary["mean_area_px"] == pytest.approx(1100.0)
+        assert summary["max_area_px"] == pytest.approx(2000.0)
+        assert summary["mean_area_frac"] == pytest.approx(0.11)
+        assert summary["max_area_frac"] == pytest.approx(0.20)
+
+        # Exposed on the list/detail schema for the frontend marker tier
+        assert HazardSummary.model_validate(hazard).bbox_area_frac == pytest.approx(0.11)
+
+        # Replay must not double-count area samples
+        aggregate_observations(db, [first])
+        db.refresh(hazard)
+        assert (hazard.pixel_area_summary or {})["count"] == 2
+        assert hazard.report_count == 2
+
+
+def test_area_summary_without_frame_size_keeps_pixels_only() -> None:
+    """Unknown frame size degrades to pixel stats (no bogus fraction)."""
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+
+    from app.db.database import Base
+    from app.db.models import DetectionObservation, Hazard
+    from app.schemas.hazards import HazardSummary
+    from app.services.aggregation_service import aggregate_observations
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+
+    with Session(engine) as db:
+        obs = DetectionObservation(
+            job_id="missing-job",
+            frame_timestamp_seconds=1.0,
+            class_name="pothole",
+            confidence=0.6,
+            bbox_xyxy=[0, 0, 30, 40],
+            gps_lat=-4.275,
+            gps_lon=21.5425,
+            gps_match_method="nearest",
+            gps_match_delta_seconds=0.0,
+        )
+        aggregate_observations(db, [obs])
+
+        hazard = db.query(Hazard).one()
+        summary = hazard.pixel_area_summary or {}
+        assert summary["mean_area_px"] == pytest.approx(1200.0)
+        assert "mean_area_frac" not in summary
+        assert HazardSummary.model_validate(hazard).bbox_area_frac is None
+
+
+# ---------------------------------------------------------------------------
 # Job state machine
 # ---------------------------------------------------------------------------
 def test_job_status_values_and_progress_bounds() -> None:

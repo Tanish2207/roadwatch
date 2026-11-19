@@ -142,6 +142,7 @@ def _process_job(job_id: str) -> None:
         accumulator = DetectionAccumulator()
         observations: list[DetectionObservation] = []
         preview_saved = False
+        frame_size: tuple[int, int] | None = None  # (width, height) of decoded frames
         preview_dir = settings.processed_dir / job_id
         frames_total = max(info.frame_count, 1)
         sampled = 0
@@ -155,6 +156,9 @@ def _process_job(job_id: str) -> None:
         ):
             if should_cancel():
                 break
+
+            if frame_size is None:
+                frame_size = (sample.frame.shape[1], sample.frame.shape[0])
 
             detections = predictor.predict_frame(
                 sample.frame, confidence=threshold, image_size=image_size
@@ -204,12 +208,21 @@ def _process_job(job_id: str) -> None:
                     sample.timestamp_s, sample.frame, detections,
                 )
             )
-            # Incremental manifest: lets the frontend stream frames live
+            # Incremental manifest: lets the frontend stream frames live.
+            # Best-effort: a transient Windows file lock (WinError 5 — AV
+            # scan or a live API reader of manifest.json) must never fail
+            # the job; the final write after the loop retries anyway.
             if len(frame_entries) % manifest_every == 0:
-                frame_store.write_manifest(
-                    job_id, frame_entries,
-                    sample_rate_fps=sample_rate, video_fps=info.fps,
-                )
+                try:
+                    frame_store.write_manifest(
+                        job_id, frame_entries,
+                        sample_rate_fps=sample_rate, video_fps=info.fps,
+                    )
+                except OSError as exc:
+                    log.warning(
+                        "Could not refresh frame manifest for job %s: %s",
+                        job_id, exc,
+                    )
 
             # Progress (0 -> 75 during inference)
             if sample.index % 10 == 0:
@@ -222,6 +235,14 @@ def _process_job(job_id: str) -> None:
                 break
 
         job.frames_processed = sampled
+        # Source frame size: bbox areas are normalized against it when the
+        # hazard's pixel-area summary is rebuilt (marker sizing on the map).
+        if frame_size is not None:
+            job.processing_config = {
+                **(job.processing_config or {}),
+                "frame_width": frame_size[0],
+                "frame_height": frame_size[1],
+            }
         db.commit()
 
         # Persist the frame manifest (even on cancel: keep what we processed)

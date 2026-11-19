@@ -113,6 +113,10 @@ export interface HazardSummary {
   last_seen_at: string;
   location_uncertainty_m: number | null;
   is_stale: boolean;
+  /** Raw YOLO bbox aggregates (pixel counts + frame-normalized fractions). */
+  pixel_area_summary: Record<string, unknown> | null;
+  /** Mean bbox area as a fraction of the source frame — drives marker size. */
+  bbox_area_frac: number | null;
 }
 
 export interface HazardObservationOut {
@@ -138,7 +142,6 @@ export interface StatusHistoryOut {
 export interface HazardDetail extends HazardSummary {
   resolved_at: string | null;
   resolved_note: string | null;
-  pixel_area_summary: Record<string, unknown> | null;
   physical_area_m2: number | null;
   observations: HazardObservationOut[];
   observations_total: number;

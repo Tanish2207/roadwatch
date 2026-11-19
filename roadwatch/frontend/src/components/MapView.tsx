@@ -3,7 +3,8 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { HAZARD_SIZE_PX, type HazardSize } from "../utils/hazardSize";
 
 /** A data point rendered on the map (hazard, waypoint, ...). */
 export interface MapMarkerSpec {
@@ -14,6 +15,8 @@ export interface MapMarkerSpec {
   label: string;
   /** Drives the colour via the rw-marker__body--{kind} CSS class. */
   kind: string;
+  /** Size tier derived from the YOLO bbox area; defaults to medium. */
+  size?: HazardSize;
   selected?: boolean;
 }
 
@@ -42,16 +45,91 @@ export interface MapViewProps {
   ariaLabel?: string;
 }
 
-const OSM_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+/** Switchable map base layer. Satellite is the default (see DEFAULT_BASE_LAYER). */
+type BaseLayerKind = "satellite" | "satellite-labels" | "street";
+
+interface BaseLayerSpec {
+  /** Button label in the corner switcher. */
+  label: string;
+  /** Spoken name — clearer than the short button text. */
+  ariaLabel: string;
+  url: string;
+  attribution: string;
+  /**
+   * Transparent layers stacked above the base tiles for as long as this layer
+   * is active (place + road labels over the satellite imagery).
+   */
+  overlays?: string[];
+}
+
+const ESRI_ATTRIBUTION =
+  'Tiles © <a href="https://www.esri.com/">Esri</a> — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community';
+/** Fuller credit: the label overlays also draw on HERE, Garmin and OSM data. */
+const ESRI_LABELLED_ATTRIBUTION =
+  'Tiles © <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar, HERE, Garmin, © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const OSM_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
+const ESRI_IMAGERY_URL =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+const ESRI_REFERENCE_URL =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/";
+
+const BASE_LAYERS: Record<BaseLayerKind, BaseLayerSpec> = {
+  satellite: {
+    label: "Satellite",
+    ariaLabel: "Satellite imagery",
+    url: ESRI_IMAGERY_URL,
+    attribution: ESRI_ATTRIBUTION,
+  },
+  "satellite-labels": {
+    label: "Labels",
+    ariaLabel: "Satellite imagery with labels",
+    url: ESRI_IMAGERY_URL,
+    attribution: ESRI_LABELLED_ATTRIBUTION,
+    overlays: [
+      ESRI_REFERENCE_URL + "World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+      ESRI_REFERENCE_URL + "World_Transportation/MapServer/tile/{z}/{y}/{x}",
+    ],
+  },
+  street: {
+    label: "Street",
+    ariaLabel: "Street map",
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: OSM_ATTRIBUTION,
+  },
+};
+
+/** localStorage key remembering the chosen base layer across refreshes. */
+const BASE_LAYER_KEY = "roadwatch.base_layer";
+const DEFAULT_BASE_LAYER: BaseLayerKind = "satellite";
+
+/** Restore the saved base layer, falling back to satellite. */
+function readStoredBaseLayer(): BaseLayerKind {
+  try {
+    const saved = window.localStorage.getItem(BASE_LAYER_KEY);
+    return saved === "satellite" || saved === "satellite-labels" || saved === "street"
+      ? saved
+      : DEFAULT_BASE_LAYER;
+  } catch {
+    // Storage unavailable (private mode); satellite is the documented default.
+    return DEFAULT_BASE_LAYER;
+  }
+}
+
+/** Marker box size in px — matches the `.rw-marker__body--size-*` CSS. */
+function markerPx(m: MapMarkerSpec): number {
+  return HAZARD_SIZE_PX[m.size ?? "medium"];
+}
+
 function dataIcon(m: MapMarkerSpec): L.DivIcon {
+  const px = markerPx(m);
+  const size = m.size ?? "medium";
   return L.divIcon({
-    html: `<div class="rw-marker__body rw-marker__body--${m.kind}"></div>`,
+    html: `<div class="rw-marker__body rw-marker__body--${m.kind} rw-marker__body--size-${size}"></div>`,
     className: `rw-marker${m.selected ? " rw-marker--selected" : ""}`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
+    iconSize: [px, px],
+    iconAnchor: [px / 2, px / 2],
   });
 }
 
@@ -89,6 +167,14 @@ export function MapView({
   const vehicleRef = useRef<L.Marker | null>(null);
   const vehicleHeadingRef = useRef<number | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
+  // Base layers are built once with the map and swapped in place, so switching
+  // style must not recreate the map (that would reset the viewport).
+  const [baseLayer, setBaseLayer] = useState<BaseLayerKind>(readStoredBaseLayer);
+  const baseLayerRef = useRef(baseLayer);
+  baseLayerRef.current = baseLayer;
+  // Each style owns a stack of tile layers (base + optional label overlays).
+  const tileLayersRef = useRef<Partial<Record<BaseLayerKind, L.TileLayer[]>>>({});
+  const activeTilesRef = useRef<L.TileLayer[]>([]);
   // Latest callback without rebuilding markers when its identity changes.
   const clickRef = useRef(onMarkerClick);
   clickRef.current = onMarkerClick;
@@ -104,7 +190,25 @@ export function MapView({
       zoomControl: true,
       attributionControl: true,
     });
-    L.tileLayer(OSM_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 }).addTo(map);
+    // Build every style's layer stack once; only the active stack is on the map.
+    const tileLayers = Object.fromEntries(
+      (Object.keys(BASE_LAYERS) as BaseLayerKind[]).map((kind) => {
+        const spec = BASE_LAYERS[kind];
+        const stack = [
+          L.tileLayer(spec.url, { attribution: spec.attribution, maxZoom: 19 }),
+          // Label overlays sit in the same pane but are added after the base,
+          // so they paint on top of the imagery.
+          ...(spec.overlays ?? []).map((url) =>
+            L.tileLayer(url, { attribution: spec.attribution, maxZoom: 19 }),
+          ),
+        ];
+        return [kind, stack] as const;
+      }),
+    ) as Record<BaseLayerKind, L.TileLayer[]>;
+    tileLayersRef.current = tileLayers;
+    const initialStack = tileLayers[baseLayerRef.current];
+    initialStack.forEach((layer) => layer.addTo(map));
+    activeTilesRef.current = initialStack;
 
     const routeLayer = L.layerGroup().addTo(map);
     const markerLayer: L.LayerGroup = cluster
@@ -133,8 +237,26 @@ export function MapView({
       vehicleRef.current = null;
       vehicleHeadingRef.current = null;
       circleRef.current = null;
+      tileLayersRef.current = {};
+      activeTilesRef.current = [];
     };
   }, [cluster]);
+
+  // --- Base-layer switch (satellite / labelled / street), kept across refreshes
+  useEffect(() => {
+    const map = mapRef.current;
+    const next = tileLayersRef.current[baseLayer];
+    if (!map || !next) return;
+    if (activeTilesRef.current === next) return;
+    for (const layer of activeTilesRef.current) map.removeLayer(layer);
+    for (const layer of next) layer.addTo(map);
+    activeTilesRef.current = next;
+    try {
+      window.localStorage.setItem(BASE_LAYER_KEY, baseLayer);
+    } catch {
+      // Storage unavailable; the choice simply will not persist.
+    }
+  }, [baseLayer]);
 
   // --- Route polyline --------------------------------------------------------
   useEffect(() => {
@@ -160,7 +282,11 @@ export function MapView({
         keyboard: true,
         riseOnHover: true,
       });
-      marker.bindTooltip(m.label, { direction: "top", offset: [0, -13] });
+      // Lift the tooltip clear of whatever size tier the marker is.
+      marker.bindTooltip(m.label, {
+        direction: "top",
+        offset: [0, -(markerPx(m) / 2 + 2)],
+      });
       marker.on("click", () => clickRef.current?.(m.id));
       layer.addLayer(marker);
     }
@@ -258,10 +384,25 @@ export function MapView({
 
   return (
     <div
-      ref={containerRef}
       className={`rw-map ${className}`}
       role="application"
       aria-label={ariaLabel}
-    />
+    >
+      <div ref={containerRef} className="rw-map__canvas" />
+      <div className="rw-map__basemap" role="group" aria-label="Map style">
+        {(Object.keys(BASE_LAYERS) as BaseLayerKind[]).map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            className="rw-map__basemap-btn"
+            aria-label={BASE_LAYERS[kind].ariaLabel}
+            aria-pressed={baseLayer === kind}
+            onClick={() => setBaseLayer(kind)}
+          >
+            {BASE_LAYERS[kind].label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

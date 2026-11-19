@@ -142,10 +142,59 @@
    Leaflet map + neo-brutalist marker/cluster chrome (M6/M7)
 ---------------------------------------------------------------- */
 .rw-map {
+  position: relative;
   width: 100%;
   height: 100%;
   min-height: 440px;
   background: color-mix(in srgb, var(--color-accent-blue) 25%, var(--color-canvas));
+}
+
+/* Leaflet attaches here; absolutely positioned so it always fills .rw-map. */
+.rw-map__canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Base-layer switcher (satellite / street), top-right to clear Leaflet's
+   zoom control (top-left) and the Simulation status overlay. */
+.rw-map__basemap {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  display: flex;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 3px solid var(--color-ink);
+  border-radius: var(--radius-nb);
+  box-shadow: var(--shadow-nb-sm);
+}
+
+.rw-map__basemap-btn {
+  appearance: none;
+  padding: 0.4rem 0.65rem;
+  border: 0;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.rw-map__basemap-btn + .rw-map__basemap-btn {
+  border-left: 3px solid var(--color-ink);
+}
+
+.rw-map__basemap-btn:hover {
+  background: var(--color-accent-yellow);
+}
+
+.rw-map__basemap-btn[aria-pressed="true"] {
+  background: var(--color-accent-blue);
 }
 
 .rw-map .leaflet-container {
@@ -238,6 +287,15 @@
   outline-offset: 2px;
   transform: scale(1.25);
 }
+
+/* Size tiers from the YOLO bbox area — px values mirror HAZARD_SIZE_PX */
+.rw-marker__body--size-small { width: 16px; height: 16px; }
+.rw-marker__body--size-small::after { width: 4px; height: 4px; margin-top: 3px; }
+
+.rw-marker__body--size-medium { width: 22px; height: 22px; }
+
+.rw-marker__body--size-severe { width: 30px; height: 30px; }
+.rw-marker__body--size-severe::after { width: 8px; height: 8px; margin-top: 7px; }
 
 .rw-marker__body--hazard-new { background: var(--color-accent-yellow); }
 .rw-marker__body--hazard-observed { background: var(--color-accent-blue); }

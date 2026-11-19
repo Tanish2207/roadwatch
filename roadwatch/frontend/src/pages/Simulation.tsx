@@ -16,6 +16,7 @@ import type {
   SimulationState,
 } from "../types/api";
 import { buildLegs, poseAtDistance, type RouteLeg, type VehiclePose } from "../utils/geo";
+import { hazardSizeFor } from "../utils/hazardSize";
 
 const TICK_MS = 100;
 const ALERT_QUERY_EVERY_TICKS = 3; // ~330 ms between alert queries
@@ -279,14 +280,18 @@ export function Simulation() {
   // --- Map inputs ----------------------------------------------------------------
   const hazardMarkers = useMemo<MapMarkerSpec[]>(() => {
     const items = hazards.data?.items ?? [];
-    return items.map((h) => ({
-      id: h.id,
-      lat: h.latitude,
-      lon: h.longitude,
-      kind: `hazard-${h.status}`,
-      selected: h.id === activeHazardId,
-      label: `${h.status} · ×${h.report_count} reports`,
-    }));
+    return items.map((h) => {
+      const size = hazardSizeFor(h.bbox_area_frac);
+      return {
+        id: h.id,
+        lat: h.latitude,
+        lon: h.longitude,
+        kind: `hazard-${h.status}`,
+        size,
+        selected: h.id === activeHazardId,
+        label: `${h.status} · ×${h.report_count} reports · ${size} pothole`,
+      };
+    });
   }, [hazards.data, activeHazardId]);
 
   const radiusCircle = useMemo(
@@ -481,8 +486,8 @@ export function Simulation() {
 
             <p className="flex items-center gap-2 border-t-[3px] border-ink bg-surface px-4 py-2 font-mono text-[10px] uppercase text-ink/70">
               <MapPin size={12} />
-              Map tiles © OpenStreetMap contributors — tile requests reveal this viewport to the
-              tile provider. Playback and alerts run locally.
+              Map tiles © Esri or OpenStreetMap (switch in the map corner) — tile requests reveal
+              this viewport to the selected tile provider. Playback and alerts run locally.
             </p>
           </div>
 

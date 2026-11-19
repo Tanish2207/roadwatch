@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class HazardStatus(str, Enum):
@@ -28,6 +28,20 @@ class HazardSummary(BaseModel):
     last_seen_at: datetime
     location_uncertainty_m: float | None = None
     is_stale: bool = False
+    pixel_area_summary: dict | None = None
+
+    @computed_field
+    @property
+    def bbox_area_frac(self) -> float | None:
+        """Mean YOLO bbox area as a fraction of the source frame (0-1).
+
+        Resolution-independent size signal used to pick the map marker tier;
+        None when no area has been aggregated yet.
+        """
+        value = (self.pixel_area_summary or {}).get("mean_area_frac")
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return None
+        return round(float(value), 6)
 
 
 class HazardListResponse(BaseModel):
@@ -63,7 +77,6 @@ class StatusHistoryOut(BaseModel):
 class HazardDetail(HazardSummary):
     resolved_at: datetime | None = None
     resolved_note: str | None = None
-    pixel_area_summary: dict | None = None
     physical_area_m2: float | None = None
     observations: list[HazardObservationOut] = Field(default_factory=list)
     observations_total: int = 0

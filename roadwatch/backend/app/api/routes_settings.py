@@ -34,6 +34,6 @@ def get_settings() -> dict:
         "privacy": {
             "local_inference": True,
             "statement": "LOCAL INFERENCE · VIDEO STAYS ON THIS MACHINE",
-            "tile_provider": "OpenStreetMap (map viewport is revealed to the tile provider)",
+            "tile_provider": "Esri World Imagery satellite (default) or OpenStreetMap street — map viewport is revealed to the selected tile provider",
         },
     }

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { Simulation } from "./Simulation";
 import { fixtures, jsonResponse, stubFetch } from "../test/mockApi";
 
-// MapView pulls in Leaflet + OSM tiles; the stub exposes route/vehicle state
+// MapView pulls in Leaflet + satellite tiles; the stub exposes route/vehicle state
 // so these tests can focus on playback control and the alert feed (§18.3).
 vi.mock("../components/MapView", () => ({
   MapView: (props: {

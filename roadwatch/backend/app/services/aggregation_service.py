@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.logging import get_logger
 from app.db.models import DetectionObservation, Hazard, HazardStatusHistory, utcnow
-from app.utils.geometry import haversine_m
+from app.utils.geometry import bbox_area, haversine_m
 
 log = get_logger(__name__)
 
@@ -137,6 +137,56 @@ def _estimate_uncertainty(obs: DetectionObservation) -> float | None:
     return round(10.0 + 3.0 * obs.gps_match_delta_seconds, 1)
 
 
+def summarize_bbox_areas(
+    observations: list[DetectionObservation],
+) -> dict | None:
+    """Aggregate the YOLO bounding-box areas of a hazard's observations.
+
+    Areas are pixel counts from ``bbox_xyxy``. When the source frame size is
+    known (recorded on the job at processing time) the area is also expressed
+    as a fraction of the frame, which keeps hazards recorded at different video
+    resolutions comparable — that fraction is what sizes the map marker.
+    Returns None when no usable bounding box is present.
+    """
+    areas: list[float] = []
+    fracs: list[float] = []
+    for obs in observations:
+        area = bbox_area(obs.bbox_xyxy)
+        if area is None:
+            continue
+        areas.append(area)
+        frame_area = _frame_area_px(obs)
+        if frame_area:
+            fracs.append(area / frame_area)
+
+    if not areas:
+        return None
+    summary: dict = {
+        "count": len(areas),
+        "mean_area_px": round(sum(areas) / len(areas), 1),
+        "max_area_px": round(max(areas), 1),
+    }
+    if fracs:
+        summary["frac_count"] = len(fracs)
+        summary["mean_area_frac"] = round(sum(fracs) / len(fracs), 6)
+        summary["max_area_frac"] = round(max(fracs), 6)
+    return summary
+
+
+def _frame_area_px(obs: DetectionObservation) -> float | None:
+    """Frame pixel area stored on the observation's job, if it was recorded."""
+    job = obs.job
+    if job is None:
+        return None
+    cfg = job.processing_config or {}
+    try:
+        width = int(cfg.get("frame_width") or 0)
+        height = int(cfg.get("frame_height") or 0)
+    except (TypeError, ValueError):
+        return None
+    return float(width * height) if width > 0 and height > 0 else None
+
+
 def _absorb(db: Session, hazard: Hazard, obs: DetectionObservation) -> None:
     """Fold one observation into a hazard's aggregates.
 
@@ -178,6 +228,9 @@ def _absorb(db: Session, hazard: Hazard, obs: DetectionObservation) -> None:
     if linked:
         hazard.latitude = sum(o.gps_lat for o in linked) / len(linked)
         hazard.longitude = sum(o.gps_lon for o in linked) / len(linked)
+        # Rebuilt from the full linked set on every absorb, so replaying a
+        # publish can never double-count an area sample.
+        hazard.pixel_area_summary = summarize_bbox_areas(linked)
 
     new_status = derive_status(hazard.report_count, hazard.status)
     if new_status != hazard.status:

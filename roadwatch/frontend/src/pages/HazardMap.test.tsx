@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { HazardMap } from "./HazardMap";
 import { fixtures, jsonResponse, stubFetch, type MockRoute } from "../test/mockApi";
 
-// MapView pulls in Leaflet + OSM tiles; render a lightweight stub instead so
+// MapView pulls in Leaflet + satellite tiles; render a lightweight stub instead so
 // these tests exercise the page wiring (filters, drawer, status updates).
 vi.mock("../components/MapView", () => ({
   MapView: (props: {
@@ -26,7 +26,12 @@ vi.mock("../components/MapView", () => ({
 }));
 
 const H1 = fixtures.hazard("h1", -4.2749, 21.5426);
-const H2 = fixtures.hazard("h2", -4.2742, 21.5432, { status: "new", report_count: 1 });
+const H2 = fixtures.hazard("h2", -4.2742, 21.5432, {
+  status: "new",
+  report_count: 1,
+  // Large bbox relative to its frame -> severe tier marker
+  bbox_area_frac: 0.25,
+});
 
 function makeHandler(detailExtra: Record<string, unknown> = {}): MockRoute {
   return (url, method) => {
@@ -75,6 +80,15 @@ describe("HazardMap (M6)", () => {
     expect(screen.getByTestId("marker-h2")).toBeInTheDocument();
     expect(screen.getByText("LOCAL DEMO DATA")).toBeInTheDocument();
     expect(await screen.findByText("2 hazard(s) match")).toBeInTheDocument();
+  });
+
+  it("sizes each marker from the reported bbox area", async () => {
+    stubFetch(makeHandler());
+    render(<HazardMap />);
+
+    // h1 has a small bbox/frame fraction, h2 a large one -> tier in the label
+    expect((await screen.findByTestId("marker-h1")).textContent).toContain("small pothole");
+    expect(screen.getByTestId("marker-h2").textContent).toContain("severe pothole");
   });
 
   it("sends filter changes to the hazard query", async () => {

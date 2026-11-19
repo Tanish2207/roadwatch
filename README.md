@@ -3,22 +3,24 @@
 Local-first AI road-hazard detection and mapping platform. Processes dashcam
 footage **on this machine only** with a locally loaded YOLO model, associates
 detections with GPS, consolidates repeats into deduplicated hazard records,
-renders them on a Leaflet/OpenStreetMap map, and simulates driving a demo
-route to raise non-repeating hazard alerts.
+renders them on a Leaflet map (satellite imagery by default, switchable to a
+labelled satellite view or street view), and simulates driving a demo route to
+raise non-repeating hazard alerts.
 
 > **Prototype.** All ML inference, video, GPS and hazard data stay local.
-> The only external traffic is OpenStreetMap map tiles (a loaded map reveals
-> your viewport to the tile provider). Alerts are experimental and must not
-> be the sole basis for driving decisions.
+> The only external traffic is map tiles — Esri satellite by default,
+> switchable to OpenStreetMap street view (a loaded map reveals your viewport
+> to the tile provider). Alerts are experimental and must not be the sole
+> basis for driving decisions.
 
 ## Repository layout
 
 | Path | Contents |
 | --- | --- |
 | [`roadwatch/backend/`](roadwatch/backend/) | FastAPI app: upload → local YOLO inference → GPS matching → aggregation → hazard map API → simulation alert API, plus test suite |
-| [`roadwatch/frontend/`](roadwatch/frontend/) | React 19 + TypeScript + Vite dashboard: detection studio, hazard map (Leaflet + OSM, clustering), route simulation, settings |
+| [`roadwatch/frontend/`](roadwatch/frontend/) | React 19 + TypeScript + Vite dashboard: detection studio, hazard map (Leaflet + satellite tiles, clustering), route simulation, settings |
 | [`roadwatch/data/demo/`](roadwatch/data/demo/) | Seeded demo GPS CSV + three synthetic simulation routes |
-| [`roadwatch/scripts/`](roadwatch/scripts/) | Demo data generators (GPS CSV, routes) |
+| [`roadwatch/scripts/`](roadwatch/scripts/) | Demo data generators (GPS CSV, routes) + `clear_database.py` to empty the app database |
 | `main.py` / `main.ipynb` | Model training / exploration notebook |
 | `RoadWatch_End_to_End_Developer_Brief.pdf` | Project specification |
 

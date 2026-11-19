@@ -119,6 +119,36 @@ def test_hazard_seen_within_hours_validation(client: TestClient) -> None:
     assert res.status_code == 422
 
 
+def test_hazard_list_exposes_bbox_area_frac(client: TestClient) -> None:
+    """Marker sizing input (bbox area / frame area) rides on list + detail."""
+    from app.db.database import SessionLocal
+
+    with SessionLocal() as db:
+        now = datetime.now(UTC).replace(tzinfo=None)
+        db.add(Hazard(latitude=1.0, longitude=1.0, status="new", report_count=1,
+                      first_seen_at=now, last_seen_at=now,
+                      pixel_area_summary={"count": 3, "mean_area_frac": 0.045,
+                                          "mean_area_px": 9000.0, "max_area_px": 12000.0}))
+        db.add(Hazard(latitude=2.0, longitude=2.0, status="new", report_count=1,
+                      first_seen_at=now, last_seen_at=now, pixel_area_summary=None))
+        db.commit()
+
+    res = client.get("/api/hazards")
+    assert res.status_code == 200
+    items = {i["latitude"]: i for i in res.json()["items"]}
+
+    assert items[1.0]["bbox_area_frac"] == pytest.approx(0.045)
+    assert items[1.0]["pixel_area_summary"]["count"] == 3
+    # Hazards without an area summary fall back to the default marker size
+    assert items[2.0]["bbox_area_frac"] is None
+
+    hid = next(
+        i["id"] for i in res.json()["items"] if i["latitude"] == pytest.approx(1.0)
+    )
+    detail = client.get(f"/api/hazards/{hid}").json()
+    assert detail["bbox_area_frac"] == pytest.approx(0.045)
+
+
 # ---------------------------------------------------------------------------
 # M6: detail + status update
 # ---------------------------------------------------------------------------
