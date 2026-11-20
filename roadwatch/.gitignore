@@ -26,7 +26,7 @@ data/logs/*
 !data/database/.gitkeep
 !data/logs/.gitkeep
 
-# Model weights — never commit
+# Model weights — ignored by default; selected demo checkpoints are allowlisted below
 models/*.pt
 backend/app/ml/weights/*.pt
 
@@ -38,3 +38,8 @@ Thumbs.db
 /data/hf_cache/
 /data/training/
 /data/ultralytics/
+
+# Demo checkpoints included by the outer repo allowlist.
+!models/best.pt
+!models/roadwatch-pothole-finetuned.pt
+/models/.cache/
