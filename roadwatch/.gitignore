@@ -33,3 +33,8 @@ backend/app/ml/weights/*.pt
 # OS
 Thumbs.db
 .DS_Store
+# Fine-tuning dataset downloads, prepared samples, caches, and local tool state
+/data/kagglehub_cache/
+/data/hf_cache/
+/data/training/
+/data/ultralytics/

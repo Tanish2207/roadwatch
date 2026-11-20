@@ -174,3 +174,9 @@ timestamp,latitude,longitude,speed_mps,heading_deg
 Video, frames, GPS and inference stay on this machine. No third-party AI
 services. Only external traffic: map tiles (Esri satellite or OpenStreetMap
 street view) when a map is open.
+
+## Fine-tuning
+
+A small fine-tuning example using the Kaggle pothole dataset is documented in
+[`docs/finetuning-run.md`](docs/finetuning-run.md). The preparation and training
+scripts are in `scripts/download_kaggle_dataset.py`, `scripts/prepare_kaggle_subset.py`, and `scripts/train_finetune.py`.

@@ -53,3 +53,5 @@ _brief_extracted.txt
 .idea/
 Thumbs.db
 .DS_Store
+# Local one-off training environment
+.train-venv/
