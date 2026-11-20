@@ -48,8 +48,6 @@ cd roadwatch\backend && python -m pytest   # unit + smoke + map/simulation API t
 cd ..\frontend && npm test                 # vitest: geo utils, map, simulation UI
 ```
 
-## Not included (deliberately, see `.gitignore`)
+## Local and shared artifacts
 
-- **Model weights** (`*.pt`) — provide `best.pt` locally, see the README
-- **Source/demo videos** (`*.mp4`) — footage stays on the capturing machine
-- **`.env`**, databases, uploads, processed artifacts, logs, `venv/`, `node_modules/`
+The starting YOLO checkpoint, fine-tuned checkpoint, and selected training/evaluation reports are included under `roadwatch/models/` and `roadwatch/runs/`. Dataset downloads, prepared training images, caches, uploads, `.env`, databases, and logs remain local and are git-ignored.

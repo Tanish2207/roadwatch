@@ -30,4 +30,4 @@ python roadwatch/scripts/prepare_kaggle_subset.py
 python roadwatch/scripts/train_finetune.py
 ```
 
-Ultralytics and PyTorch are already project dependencies. The scripts and documentation are tracked. Training data, caches, run artifacts, and `.pt` weights remain local and are git-ignored.
+Ultralytics and PyTorch are already project dependencies. The checkpoints are included in `models/`; training metrics, curves, configuration, and summary files are included in `runs/finetune/`. Dataset downloads, prepared images, caches, duplicate run checkpoints, and image previews are git-ignored.

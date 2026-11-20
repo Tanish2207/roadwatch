@@ -1,0 +1,16 @@
+{
+  "starting_checkpoint": "C:\\Projects\\node practice\\roadwatch\\roadwatch\\models\\best.pt",
+  "dataset": "C:\\Projects\\node practice\\roadwatch\\roadwatch\\data\\training\\pothole_120\\data.yaml",
+  "sample_images": 120,
+  "train_images": 90,
+  "validation_images": 15,
+  "test_images": 15,
+  "epochs_requested": 8,
+  "image_size": 416,
+  "batch_size": 4,
+  "device": "cpu",
+  "best_weights": "C:\\Projects\\node practice\\roadwatch\\roadwatch\\runs\\finetune\\andrewmvd-120\\weights\\best.pt",
+  "last_weights": "C:\\Projects\\node practice\\roadwatch\\roadwatch\\runs\\finetune\\andrewmvd-120\\weights\\last.pt",
+  "torch_version": "2.11.0+cpu",
+  "cuda_available": false
+}

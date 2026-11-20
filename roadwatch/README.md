@@ -44,18 +44,12 @@ Copy `.env.example` to `.env` and adjust. Key variable:
 
 ## Model weight setup
 
-Weights are **not** committed to git. Provide them in either way:
+This repository includes two local checkpoints under `models/`:
 
-1. Set `ROADWATCH_MODEL_PATH` in `.env`, or
-2. Drop `best.pt` into `roadwatch/models/`.
+- `best.pt` — the original [Samdutse/pothole-yolov8](https://huggingface.co/Samdutse/pothole-yolov8) starting checkpoint.
+- `roadwatch-pothole-finetuned.pt` — the checkpoint produced by the small Kaggle fine-tuning run described in [`docs/finetuning-run.md`](docs/finetuning-run.md).
 
-This project uses the HuggingFace checkpoint
-[`Samdutse/pothole-yolov8`](https://huggingface.co/Samdutse/pothole-yolov8)
-(`best.pt`). **License: check the model card before redistribution** — the
-checkpoint's license terms apply to derived deployments. The current `.env`
-points at the locally cached snapshot.
-
-Runtime inference is fully offline once weights are present.
+The app auto-discovers `best.pt` by default. To use the fine-tuned checkpoint instead, set `ROADWATCH_MODEL_PATH` in `.env` to its absolute path. Runtime inference is fully offline once weights are present.
 
 ## Run
 

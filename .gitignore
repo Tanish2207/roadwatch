@@ -27,7 +27,7 @@ roadwatch/data/logs/*
 !roadwatch/data/database/.gitkeep
 !roadwatch/data/logs/.gitkeep
 
-# ---- Model weights — never commit ----
+# ---- Model weights — ignored by default; see the explicit demo allowlist below ----
 *.pt
 *.pth
 *.onnx
@@ -55,3 +55,13 @@ Thumbs.db
 .DS_Store
 # Local one-off training environment
 .train-venv/
+
+# RoadWatch demo-finetuning artifacts (explicit allowlist)
+!roadwatch/models/best.pt
+!roadwatch/models/roadwatch-pothole-finetuned.pt
+!roadwatch/runs/
+!roadwatch/runs/**
+# Keep run snapshots under models/; avoid duplicate checkpoints and copied dataset frames.
+roadwatch/runs/**/weights/
+roadwatch/runs/**/train_batch*.jpg
+roadwatch/runs/**/val_batch*.jpg
